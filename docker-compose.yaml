@@ -1,0 +1,20 @@
+version: '3.8'
+services:
+  nest_db:
+    image: postgres:15
+    ports:
+      - 5434:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: firstNest
+    volumes:
+      - dbdata6:/data/db
+    networks:
+      - first_nest
+
+volumes:
+  dbdata6:
+
+networks:
+  first_nest:
