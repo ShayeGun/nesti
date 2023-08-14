@@ -6,8 +6,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { User } from './user/user.entity';
 import { UserModule } from './user/user.module';
-import { LoggerMiddleware, LoggerMiddleware2 } from './logger.middleware';
+import { LoggerMiddleware, LoggerMiddleware2 } from './app.middleware';
 import { UserController } from './user/user.controller';
+import { APP_FILTER } from '@nestjs/core';
+import { HttpExceptionFilter } from './app.filter';
 
 @Module({
   imports: [ConfigModule.forRoot({
@@ -30,7 +32,11 @@ import { UserController } from './user/user.controller';
     UserModule
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService,
+    {
+      provide: APP_FILTER,
+      useClass: HttpExceptionFilter,
+    }],
 })
 
 export class AppModule implements NestModule {

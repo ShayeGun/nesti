@@ -1,16 +1,8 @@
 import { BadRequestException, ArgumentMetadata, Injectable, PipeTransform } from "@nestjs/common";
-import { validate, IsInt } from 'class-validator';
-import { plainToInstance } from "class-transformer";
+import { IsNumberString } from 'class-validator';
 
 export class Dto {
-    @IsInt()
+    @IsNumberString()
     id: string;
 }
 
-@Injectable()
-export class Pipy implements PipeTransform<any> {
-
-    async transform(value: any, { metatype }: ArgumentMetadata) {
-        return typeof value;
-    }
-}

@@ -1,8 +1,6 @@
-import { Logger, Controller, Get, HttpCode, Param, ParseIntPipe, UsePipes } from '@nestjs/common';
+import { Logger, Controller, Get, HttpCode, Param, ParseIntPipe, UsePipes, ValidationPipe } from '@nestjs/common';
 import { AppService } from './app.service';
-import { Dto, Pipy } from './app.pipe';
-// import { ValidationPipe } from '@nestjs/common';
-
+import { Dto } from './app.pipe';
 
 
 @Controller('/person')
@@ -22,10 +20,9 @@ export class AppController {
     return this.appService.getBye();
   }
 
-  @UsePipes(Pipy)
+  @UsePipes(ValidationPipe)
   @Get(':id')
-  findOne(@Param('id') id: any) {
-    console.log(id);
+  findOne(@Param() id: Dto) {
     return id;
   }
 }
