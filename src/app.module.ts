@@ -10,6 +10,9 @@ import { LoggerMiddleware, LoggerMiddleware2 } from './app.middleware';
 import { UserController } from './user/user.controller';
 import { APP_FILTER } from '@nestjs/core';
 import { HttpExceptionFilter } from './app.filter';
+import { ReportService } from './report/report.service';
+import { ReportModule } from './report/report.module';
+import { Report } from './report/report.entity';
 
 @Module({
   imports: [ConfigModule.forRoot({
@@ -24,19 +27,21 @@ import { HttpExceptionFilter } from './app.filter';
       host: configService.get<string>('DATABASE_URL'),
       username: configService.get<string>('DATABASE_USER'),
       password: configService.get<string>('DATABASE_PASS'),
-      entities: [User],
+      entities: [User, Report],
       synchronize: true,
     })
   }),
     AuthModule,
-    UserModule
+    UserModule,
+    // ReportModule
   ],
   controllers: [AppController],
   providers: [AppService,
-    {
-      provide: APP_FILTER,
-      useClass: HttpExceptionFilter,
-    }],
+    // {
+    //   provide: APP_FILTER,
+    //   useClass: HttpExceptionFilter,
+    // },
+    ReportService],
 })
 
 export class AppModule implements NestModule {

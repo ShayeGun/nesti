@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
@@ -10,10 +10,10 @@ export class UsersService {
         private usersRepository: Repository<User>,
     ) { }
 
-    addOne(firstName: string, lastName: string): Promise<User> {
+    addOne(email: string, password: string): Promise<User> {
         const newUser = this.usersRepository.create({
-            firstName,
-            lastName
+            email,
+            password
         });
         return this.usersRepository.save(newUser);
     }
@@ -26,7 +26,16 @@ export class UsersService {
         return this.usersRepository.findOneBy({ id });
     }
 
+    async updateOne(id: number, attrs: Partial<User>) {
+        const user = await this.usersRepository.findOneBy({ id });
+        if (!user) throw new BadRequestException();
+        Object.assign(user, attrs);
+        return this.usersRepository.save(user);
+    }
+
     async remove(id: number): Promise<void> {
-        await this.usersRepository.delete(id);
+        const user = await this.usersRepository.findOneBy({ id });
+        if (!user) throw new BadRequestException();
+        await this.usersRepository.remove(user);
     }
 }
