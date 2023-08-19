@@ -1,19 +1,21 @@
-import { Controller, Post, UseGuards } from "@nestjs/common";
-import { authService } from "./auth.service";
+import { Body, ClassSerializerInterceptor, Controller, Post, UseGuards, UseInterceptors } from "@nestjs/common";
+import { AuthService } from "./auth.service";
 import { BaseGuard } from "./guard/base.guard";
+import { CreateUserDto, LoginUserDto } from "src/user/Dtos/create-user.dto";
 
+@UseInterceptors(ClassSerializerInterceptor)
 @Controller('auth')
 @UseGuards(BaseGuard)
 export class authController {
-    constructor(private authService: authService) { };
+    constructor(private readonly authService: AuthService) { };
 
     @Post('signup')
-    signup() {
-        return this.authService.signup();
+    signup(@Body() body: CreateUserDto) {
+        return this.authService.signup(body);
     }
 
-    @Post('signin')
-    login() {
-        return this.authService.login();
+    @Post('login')
+    login(@Body() body: LoginUserDto) {
+        return this.authService.login(body);
     }
 };

@@ -1,5 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
-import { Exclude, Expose } from 'class-transformer';
+import { Entity, Column, PrimaryGeneratedColumn, Index, BeforeInsert } from 'typeorm';
+import { Exclude } from 'class-transformer';
+import { genSalt, hash } from 'bcrypt';
 
 @Entity()
 export class User {
@@ -7,9 +8,17 @@ export class User {
     id: number;
 
     @Column()
+    @Index({ unique: true })
     email: string;
 
     @Column()
     @Exclude()
     password: string;
+
+    @BeforeInsert()
+    async updateDates() {
+        const salt = await genSalt(8);
+        const hashedPass = await hash(this.password, salt);
+        this.password = hashedPass;
+    }
 }
