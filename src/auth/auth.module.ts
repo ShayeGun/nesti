@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { Module, forwardRef } from "@nestjs/common";
 import { authController } from "./auth.controller";
 import { JwtModule } from "@nestjs/jwt";
 import { ConfigModule, ConfigService } from "@nestjs/config";
@@ -11,11 +11,12 @@ import { UserModule } from "src/user/user.module";
         JwtModule.registerAsync({
             imports: [ConfigModule],
             useFactory: async (configService: ConfigService) => ({
+                global: true,
                 secret: configService.get<string>('JWT_SECRET'),
                 signOptions: { expiresIn: '1h' },
             }),
             inject: [ConfigService],
-        }), UserModule],
+        }), forwardRef(() => UserModule)],
     controllers: [authController],
     providers: [AuthService, BaseGuard],
     exports: [AuthService, BaseGuard]

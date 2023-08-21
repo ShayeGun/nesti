@@ -46,9 +46,9 @@ import { Report } from './report/report.entity';
 
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(
-        LoggerMiddleware, LoggerMiddleware2)
-      .forRoutes(UserController);
+    // consumer
+    //   .apply(
+    //     LoggerMiddleware, LoggerMiddleware2)
+    //   .forRoutes(UserController);
   }
 }
