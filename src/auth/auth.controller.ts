@@ -2,7 +2,8 @@ import { Body, ClassSerializerInterceptor, Controller, Post, UseGuards, UseInter
 import { AuthService } from "./auth.service";
 import { CreateUserDto, LoginUserDto } from "src/user/Dtos/create-user.dto";
 
-@UseInterceptors(ClassSerializerInterceptor)
+// @UseInterceptors(ClassSerializerInterceptor)
+
 @Controller('auth')
 export class authController {
     constructor(private readonly authService: AuthService) { };
