@@ -3,11 +3,12 @@ import { JwtService } from "@nestjs/jwt";
 import { UsersService } from "src/user/user.service";
 import { CreateUserDto } from "src/user/Dtos/create-user.dto";
 import { compare } from "bcrypt";
+import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class AuthService {
     constructor(private readonly userService: UsersService,
-        private readonly jwtService: JwtService) { };
+        private readonly jwtService: JwtService, private readonly configService: ConfigService) { };
 
     async signup(@Body() body: CreateUserDto) {
         const existedUser = await this.userService.findOne(body.email);
@@ -16,13 +17,14 @@ export class AuthService {
 
         const newUser = await this.userService.addOne(body);
 
-        delete newUser.password;
-
-        const jwt = await this.jwtService.signAsync({ ...newUser });
+        const accessToken = await this.jwtService.signAsync({ ...newUser }, {
+            secret: this.configService.get<string>('JWT_SECRET'),
+            expiresIn: this.configService.get<string>('JWT_EXPIRATION'),
+        });
 
         return {
             user: newUser,
-            accessToken: jwt
+            accessToken
         };
     };
 

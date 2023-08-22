@@ -31,11 +31,11 @@ export class UsersService {
         return this.userModel.findOne({ email }).exec();
     }
 
-    async updateOne(id: number, attrs: Partial<User>) {
+    async updateOne(query: Record<string, any>, attrs: Partial<User>) {
         // const user = await this.userModel.findOneBy({ id });
-        const user = await this.userModel.findById(id).exec();
+        const user = await this.userModel.findOneAndUpdate(query, attrs).exec();
         if (!user) throw new BadRequestException();
-        Object.assign(user, attrs);
+        // Object.assign(user, attrs);
         // return this.userModel.save(user);
         return user.save();
     }

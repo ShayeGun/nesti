@@ -10,7 +10,7 @@ export class UserController {
     @Post(':id')
     @HttpCode(201)
     updateOne(@Body() body: User, @Param('id') id: string) {
-        return this.userService.updateOne(+id, body);
+        return this.userService.updateOne({ id }, body);
     }
 
     @Delete(':id')

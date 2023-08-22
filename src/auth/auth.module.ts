@@ -1,6 +1,6 @@
 import { Module, forwardRef } from "@nestjs/common";
 import { authController } from "./auth.controller";
-import { JwtModule } from "@nestjs/jwt";
+import { JwtModule, JwtService } from "@nestjs/jwt";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { AuthService } from "./auth.service";
 import { BaseGuard } from "./guard/base.guard";
@@ -8,17 +8,10 @@ import { UserModule } from "src/user/user.module";
 
 @Module({
     imports: [
-        JwtModule.registerAsync({
-            imports: [ConfigModule],
-            useFactory: async (configService: ConfigService) => ({
-                global: true,
-                secret: configService.get<string>('JWT_SECRET'),
-                signOptions: { expiresIn: '1h' },
-            }),
-            inject: [ConfigService],
-        }), forwardRef(() => UserModule)],
+        JwtModule.register({}),
+        forwardRef(() => UserModule)],
     controllers: [authController],
-    providers: [AuthService, BaseGuard],
+    providers: [AuthService, BaseGuard, JwtService],
     exports: [AuthService, BaseGuard]
 })
 
