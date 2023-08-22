@@ -1,6 +1,5 @@
-import { Logger, Controller, Get, HttpCode, Param, ParseIntPipe, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Controller, Get, HttpCode } from '@nestjs/common';
 import { AppService } from './app.service';
-import { Dto } from './app.pipe';
 
 
 @Controller('/person')
@@ -18,11 +17,5 @@ export class AppController {
   @HttpCode(200)
   bye(): string {
     return this.appService.getBye();
-  }
-
-  @UsePipes(ValidationPipe)
-  @Get(':id')
-  findOne(@Param() id: Dto) {
-    return id;
   }
 }

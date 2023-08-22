@@ -3,6 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { User } from './user/user.entity';
 import { UserModule } from './user/user.module';
@@ -19,17 +20,23 @@ import { Report } from './report/report.entity';
     isGlobal: true,
     envFilePath: '.env',
   }),
-  TypeOrmModule.forRootAsync({
-    inject: [ConfigService],
+  // TypeOrmModule.forRootAsync({
+  //   inject: [ConfigService],
+  //   useFactory: (configService: ConfigService) => ({
+  //     type: 'postgres',
+  //     port: configService.get<number>('DATABASE_PORT'),
+  //     host: configService.get<string>('DATABASE_URL'),
+  //     username: configService.get<string>('DATABASE_USER'),
+  //     password: configService.get<string>('DATABASE_PASS'),
+  //     entities: [User, Report],
+  //     synchronize: true,
+  //   })
+  // }),
+  MongooseModule.forRootAsync({
     useFactory: (configService: ConfigService) => ({
-      type: 'postgres',
-      port: configService.get<number>('DATABASE_PORT'),
-      host: configService.get<string>('DATABASE_URL'),
-      username: configService.get<string>('DATABASE_USER'),
-      password: configService.get<string>('DATABASE_PASS'),
-      entities: [User, Report],
-      synchronize: true,
-    })
+      uri: configService.get<string>('MONGO_URI')
+    }),
+    inject: [ConfigService]
   }),
     AuthModule,
     UserModule,
