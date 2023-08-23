@@ -26,14 +26,15 @@ export class UsersService {
         return this.userModel.find().exec();
     }
 
-    findOne(email: string): Promise<User | null> {
+    findOne(query: Record<string, any>): Promise<User | null> {
         // return this.userModel.findOneBy({ email });
-        return this.userModel.findOne({ email }).exec();
+        return this.userModel.findOne(query).exec();
     }
 
     async updateOne(query: Record<string, any>, attrs: Partial<User>) {
         // const user = await this.userModel.findOneBy({ id });
         const user = await this.userModel.findOneAndUpdate(query, attrs).exec();
+
         if (!user) throw new BadRequestException();
         // Object.assign(user, attrs);
         // return this.userModel.save(user);

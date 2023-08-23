@@ -11,37 +11,101 @@ export class AuthService {
         private readonly jwtService: JwtService, private readonly configService: ConfigService) { };
 
     async signup(@Body() body: CreateUserDto) {
-        const existedUser = await this.userService.findOne(body.email);
+        const existedUser = await this.userService.findOne({ email: body.email });
 
         if (existedUser) throw new HttpException('email already exist', HttpStatus.FORBIDDEN);
 
         const newUser = await this.userService.addOne(body);
 
-        const accessToken = await this.jwtService.signAsync({ ...newUser }, {
-            secret: this.configService.get<string>('JWT_SECRET'),
-            expiresIn: this.configService.get<string>('JWT_EXPIRATION'),
-        });
+        const { refreshToken, accessToken } = await this.generateTokens({ email: newUser.email, id: newUser["_id"] });
+
+        const u = await this.userService.updateOne({ _id: newUser["_id"] }, { refreshToken });
 
         return {
-            user: newUser,
-            accessToken
+            user: u,
+            accessToken,
+            refreshToken
         };
     };
 
     async login(@Body() body: CreateUserDto) {
-        const existedUser = await this.userService.findOne(body.email);
+        const existedUser = await this.userService.findOne({ email: body.email });
 
         if (!existedUser) throw new HttpException('no such user', HttpStatus.FORBIDDEN);
 
         if (!await compare(body.password, existedUser.password)) throw new UnauthorizedException();
 
-        const jwt = await this.jwtService.signAsync({ ...existedUser });
+        const { refreshToken, accessToken } = await this.generateTokens({ email: existedUser.email, id: existedUser["_id"] });
 
+        const u = await this.userService.updateOne({ _id: existedUser["_id"] }, { refreshToken });
+
+        // FIX: refresh token duplication
         return {
-            user: existedUser,
-            accessToken: jwt
+            user: u,
+            accessToken,
+            refreshToken
         };
     };
 
-    generateAccessToken(payload: Record<string, any>, secret: string) { }
+    async refreshAccessToken(token: { accessToken: string, refreshToken: string; }) {
+        const data = this.validateRefreshToken(token);
+        return data;
+    }
+
+    private async generateTokens(payload: Record<string, any>) {
+        const accessToken = await this.jwtService.signAsync(payload, {
+            secret: this.configService.get<string>('JWT_SECRET'),
+            expiresIn: this.configService.get<string>('JWT_EXPIRATION'),
+        });
+
+        const refreshToken = await this.jwtService.signAsync(payload, {
+            secret: this.configService.get<string>('REFRESH_SECRET'),
+            expiresIn: this.configService.get<string>('REFRESH_EXPIRATION'),
+        });
+
+        return { accessToken, refreshToken };
+    }
+
+    private async validateRefreshToken(token: { accessToken: string, refreshToken: string; }) {
+        const { refreshToken, accessToken } = token;
+
+        const accessPayload = this.getTokenPayload(accessToken);
+        const refreshPayload = this.getTokenPayload(refreshToken);
+
+        // 1) check payloads
+        if (accessPayload.id !== refreshPayload.id) throw new UnauthorizedException('not valid refresh token');
+
+        // 2) check refresh token validity <refresh id and access id are the same but refreshToken is invalid>
+        console.log(await this.jwtService.verifyAsync(refreshToken, {
+            secret: this.configService.get<string>('REFRESH_SECRET')
+        }));
+
+        if (! await this.jwtService.verifyAsync(refreshToken, {
+            secret: this.configService.get<string>('REFRESH_SECRET')
+        })) {
+            await this.userService.updateOne({ _id: refreshPayload.id }, { refreshToken: '' });
+            throw new UnauthorizedException('not valid refresh token');
+        }
+        console.log('here');
+
+        // 3) create a new refresh and access token
+        this.generateTokens({ email: refreshPayload.email, id: refreshPayload.id });
+
+        const u = await this.userService.updateOne({ _id: refreshPayload.id }, { refreshToken });
+
+        // FIX: refresh token duplication
+        return {
+            user: u,
+            accessToken,
+            refreshToken
+        };
+    }
+
+    private getTokenPayload(token: string) {
+        const tokenPayload: string = token.split('.')[1];
+
+        const tokenFormatted = JSON.parse(Buffer.from(tokenPayload, 'base64').toString('utf-8'));
+
+        return tokenFormatted;
+    }
 }

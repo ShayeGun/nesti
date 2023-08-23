@@ -18,11 +18,15 @@ import { genSalt, hash } from 'bcrypt';
         name: User.name,
         useFactory: () => {
           const schema = UserSchema;
+
           schema.pre('save', async function () {
-            const salt = await genSalt(8);
-            const hashedPass = await hash(this.password, salt);
-            this.password = hashedPass;
+            if (this.isModified('password')) {
+              const salt = await genSalt(8);
+              const hashedPass = await hash(this.password, salt);
+              this.password = hashedPass;
+            }
           });
+
           return schema;
         },
       },
