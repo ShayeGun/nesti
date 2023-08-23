@@ -71,34 +71,35 @@ export class AuthService {
 
         const accessPayload = this.getTokenPayload(accessToken);
         const refreshPayload = this.getTokenPayload(refreshToken);
+        try {
 
-        // 1) check payloads
-        if (accessPayload.id !== refreshPayload.id) throw new UnauthorizedException('not valid refresh token');
 
-        // 2) check refresh token validity <refresh id and access id are the same but refreshToken is invalid>
-        console.log(await this.jwtService.verifyAsync(refreshToken, {
-            secret: this.configService.get<string>('REFRESH_SECRET')
-        }));
+            // 1) check payloads
+            if (accessPayload.id !== refreshPayload.id) throw new UnauthorizedException('not valid refresh token');
 
-        if (! await this.jwtService.verifyAsync(refreshToken, {
-            secret: this.configService.get<string>('REFRESH_SECRET')
-        })) {
-            await this.userService.updateOne({ _id: refreshPayload.id }, { refreshToken: '' });
-            throw new UnauthorizedException('not valid refresh token');
+            // 2) check refresh token validity <refresh id and access id are the same but refreshToken is invalid>
+            await this.jwtService.verify(refreshToken, {
+                secret: this.configService.get<string>('REFRESH_SECRET')
+            });
+
+            // 3) create a new refresh and access token
+            this.generateTokens({ email: refreshPayload.email, id: refreshPayload.id });
+
+            const u = await this.userService.updateOne({ _id: refreshPayload.id }, { refreshToken });
+
+            // FIX: refresh token duplication
+            return {
+                user: u,
+                accessToken,
+                refreshToken
+            };
+        } catch (err) {
+            if (err.message === "invalid token") {
+                await this.userService.updateOne({ _id: refreshPayload.id }, { refreshToken: '' });
+            }
+            throw new UnauthorizedException(err.message);
         }
-        console.log('here');
 
-        // 3) create a new refresh and access token
-        this.generateTokens({ email: refreshPayload.email, id: refreshPayload.id });
-
-        const u = await this.userService.updateOne({ _id: refreshPayload.id }, { refreshToken });
-
-        // FIX: refresh token duplication
-        return {
-            user: u,
-            accessToken,
-            refreshToken
-        };
     }
 
     private getTokenPayload(token: string) {

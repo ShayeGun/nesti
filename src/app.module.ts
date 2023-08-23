@@ -44,10 +44,10 @@ import { Report } from './report/report.entity';
   ],
   controllers: [AppController],
   providers: [AppService,
-    // {
-    //   provide: APP_FILTER,
-    //   useClass: HttpExceptionFilter,
-    // },
+    {
+      provide: APP_FILTER,
+      useClass: HttpExceptionFilter,
+    },
     ReportService],
 })
 
