@@ -72,8 +72,6 @@ export class AuthService {
         const accessPayload = this.getTokenPayload(accessToken);
         const refreshPayload = this.getTokenPayload(refreshToken);
         try {
-
-
             // 1) check payloads
             if (accessPayload.id !== refreshPayload.id) throw new UnauthorizedException('not valid refresh token');
 
@@ -82,21 +80,25 @@ export class AuthService {
                 secret: this.configService.get<string>('REFRESH_SECRET')
             });
 
-            // 3) create a new refresh and access token
-            this.generateTokens({ email: refreshPayload.email, id: refreshPayload.id });
+            // 3) check refresh token validity <refresh token is valid but is not in DB>
+            const existedUser = await this.userService.findOne({ refreshToken });
 
-            const u = await this.userService.updateOne({ _id: refreshPayload.id }, { refreshToken });
+            if (!existedUser) await this.userService.updateOne({ _id: refreshPayload.id }, { refreshToken: '' });
+
+
+            // 4) create a new refresh and access token
+            const { accessToken: newAccess, refreshToken: newRefresh } = await this.generateTokens({ email: refreshPayload.email, id: refreshPayload.id });
+
+            existedUser.refreshToken = newRefresh;
+            await (existedUser as any).save();
 
             // FIX: refresh token duplication
             return {
-                user: u,
-                accessToken,
-                refreshToken
+                user: existedUser,
+                accessToken: newAccess,
+                refreshToken: newRefresh
             };
         } catch (err) {
-            if (err.message === "invalid token") {
-                await this.userService.updateOne({ _id: refreshPayload.id }, { refreshToken: '' });
-            }
             throw new UnauthorizedException(err.message);
         }
 
