@@ -17,7 +17,7 @@ export class AuthService {
 
         const newUser = await this.userService.addOne(body);
 
-        const { refreshToken, accessToken } = await this.generateTokens({ email: newUser.email, id: newUser["_id"] });
+        const { refreshToken, accessToken } = await this.generateTokens({ email: newUser.email, id: newUser["_id"], role: newUser.role });
 
         const u = await this.userService.updateOne({ _id: newUser["_id"] }, { refreshToken });
 
@@ -35,7 +35,7 @@ export class AuthService {
 
         if (!await compare(body.password, existedUser.password)) throw new UnauthorizedException();
 
-        const { refreshToken, accessToken } = await this.generateTokens({ email: existedUser.email, id: existedUser["_id"] });
+        const { refreshToken, accessToken } = await this.generateTokens({ email: existedUser.email, id: existedUser["_id"], role: existedUser.role });
 
         const u = await this.userService.updateOne({ _id: existedUser["_id"] }, { refreshToken });
 
