@@ -5,7 +5,6 @@ import { AuthModule } from './auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { User } from './user/user.entity';
 import { UserModule } from './user/user.module';
 import { LoggerMiddleware, LoggerMiddleware2 } from './app.middleware';
 import { UserController } from './user/user.controller';

@@ -1,7 +1,6 @@
 import { Controller, HttpCode, Body, Post, Get, UseGuards, Req, UseInterceptors, ValidationPipe, Param, Delete, } from '@nestjs/common';
 import { UsersService } from './user.service';
 import { BaseGuard } from 'src/auth/guard/base.guard';
-import { User } from './user.entity';
 
 @Controller('user')
 export class UserController {
@@ -9,7 +8,7 @@ export class UserController {
 
     @Post(':id')
     @HttpCode(201)
-    updateOne(@Body() body: User, @Param('id') id: string) {
+    updateOne(@Body() body: any, @Param('id') id: string) {
         return this.userService.updateOne({ id }, body);
     }
 

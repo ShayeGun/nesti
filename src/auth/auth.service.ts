@@ -1,4 +1,4 @@
-import { Body, Injectable, HttpException, HttpStatus, UnauthorizedException } from "@nestjs/common";
+import { Body, Injectable, UnauthorizedException, BadRequestException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { UsersService } from "src/user/user.service";
 import { CreateUserDto } from "src/user/Dtos/create-user.dto";
@@ -13,7 +13,7 @@ export class AuthService {
     async signup(@Body() body: CreateUserDto) {
         const existedUser = await this.userService.findOne({ email: body.email });
 
-        if (existedUser) throw new HttpException('email already exist', HttpStatus.FORBIDDEN);
+        if (existedUser) throw new BadRequestException('email already exist');
 
         const newUser = await this.userService.addOne(body);
 
@@ -31,7 +31,7 @@ export class AuthService {
     async login(@Body() body: CreateUserDto) {
         const existedUser = await this.userService.findOne({ email: body.email });
 
-        if (!existedUser) throw new HttpException('no such user', HttpStatus.FORBIDDEN);
+        if (!existedUser) throw new BadRequestException('no such user');
 
         if (!await compare(body.password, existedUser.password)) throw new UnauthorizedException();
 
@@ -39,7 +39,6 @@ export class AuthService {
 
         const u = await this.userService.updateOne({ _id: existedUser["_id"] }, { refreshToken });
 
-        // FIX: refresh token duplication
         return {
             user: u,
             accessToken,
@@ -83,6 +82,8 @@ export class AuthService {
             // 3) check refresh token validity <refresh token is valid but is not in DB>
             const existedUser = await this.userService.findOne({ refreshToken });
 
+            console.log(existedUser);
+
             if (!existedUser) await this.userService.updateOne({ _id: refreshPayload.id }, { refreshToken: '' });
 
 
@@ -92,7 +93,6 @@ export class AuthService {
             existedUser.refreshToken = newRefresh;
             await (existedUser as any).save();
 
-            // FIX: refresh token duplication
             return {
                 user: existedUser,
                 accessToken: newAccess,
