@@ -1,6 +1,8 @@
 import { Controller, HttpCode, Body, Post, Get, UseGuards, Req, UseInterceptors, ValidationPipe, Param, Delete, } from '@nestjs/common';
 import { UsersService } from './user.service';
-import { BaseGuard } from 'src/auth/guard/base.guard';
+import { BaseGuard, RolesGuard } from 'src/auth/guard/index';
+import { Roles } from 'src/auth/role.decorator';
+import { Role } from 'src/auth/role.enum';
 
 @Controller('user')
 export class UserController {
@@ -18,7 +20,8 @@ export class UserController {
         return this.userService.remove(+id);
     }
 
-    @UseGuards(BaseGuard)
+    @Roles(Role.Admin)
+    @UseGuards(BaseGuard, RolesGuard)
     @Get()
     @UseInterceptors(ValidationPipe)
     @HttpCode(200)

@@ -3,7 +3,7 @@ import { authController } from "./auth.controller";
 import { JwtModule, JwtService } from "@nestjs/jwt";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { AuthService } from "./auth.service";
-import { BaseGuard } from "./guard/base.guard";
+import { BaseGuard, RolesGuard } from "./guard/index";
 import { UserModule } from "src/user/user.module";
 
 @Module({
@@ -11,8 +11,8 @@ import { UserModule } from "src/user/user.module";
         JwtModule.register({}),
         forwardRef(() => UserModule)],
     controllers: [authController],
-    providers: [AuthService, BaseGuard, JwtService],
-    exports: [AuthService, BaseGuard]
+    providers: [AuthService, BaseGuard, RolesGuard, JwtService],
+    exports: [AuthService, BaseGuard, RolesGuard]
 })
 
 export class AuthModule { };
