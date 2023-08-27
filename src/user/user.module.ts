@@ -2,7 +2,6 @@ import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserController } from './user.controller';
 import { UsersService } from './user.service';
-// import { User } from './user.entity';
 import { AuthModule } from 'src/auth/auth.module';
 import { BaseGuard } from 'src/auth/guard/base.guard';
 import { JwtService } from '@nestjs/jwt';
@@ -12,7 +11,6 @@ import { genSalt, hash } from 'bcrypt';
 
 @Module({
   imports: [
-    // TypeOrmModule.forFeature([User]), forwardRef(() => AuthModule)
     MongooseModule.forFeatureAsync([
       {
         name: User.name,
@@ -36,7 +34,6 @@ import { genSalt, hash } from 'bcrypt';
   controllers: [UserController],
   providers: [UsersService, JwtService, BaseGuard],
   exports: [
-    // TypeOrmModule,
     UsersService
   ]
 })

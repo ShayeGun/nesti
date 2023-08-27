@@ -20,18 +20,6 @@ import { Report } from './report/report.entity';
     isGlobal: true,
     envFilePath: '.env',
   }),
-  // TypeOrmModule.forRootAsync({
-  //   inject: [ConfigService],
-  //   useFactory: (configService: ConfigService) => ({
-  //     type: 'postgres',
-  //     port: configService.get<number>('DATABASE_PORT'),
-  //     host: configService.get<string>('DATABASE_URL'),
-  //     username: configService.get<string>('DATABASE_USER'),
-  //     password: configService.get<string>('DATABASE_PASS'),
-  //     entities: [User, Report],
-  //     synchronize: true,
-  //   })
-  // }),
   MongooseModule.forRootAsync({
     useFactory: (configService: ConfigService) => ({
       uri: configService.get<string>('MONGO_URI')

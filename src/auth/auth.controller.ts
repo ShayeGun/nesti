@@ -3,8 +3,6 @@ import { AuthService } from "./auth.service";
 import { CreateUserDto, LoginUserDto } from "src/user/Dtos/create-user.dto";
 import { RefreshTokenDto } from "./Dtos/refresh-token-dto";
 
-// @UseInterceptors(ClassSerializerInterceptor)
-
 @Controller('auth')
 export class authController {
     constructor(private readonly authService: AuthService) { };
