@@ -3,6 +3,7 @@ import { UsersService } from './user.service';
 import { BaseGuard, RolesGuard } from 'src/auth/guard/index';
 import { Roles } from 'src/auth/role.decorator';
 import { Role } from 'src/auth/role.enum';
+import { User } from './current-user.decorator';
 
 @Controller('user')
 export class UserController {
@@ -23,10 +24,16 @@ export class UserController {
     @Roles(Role.Admin)
     @UseGuards(BaseGuard, RolesGuard)
     @Get()
-    @UseInterceptors(ValidationPipe)
     @HttpCode(200)
     findAll(@Req() req: any) {
         return this.userService.findAll();
+    }
+
+    @UseGuards(BaseGuard)
+    @Get('/current')
+    @HttpCode(200)
+    showUser(@User() user: any) {
+        return user;
     }
 }
 
