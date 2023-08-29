@@ -10,9 +10,7 @@ import { LoggerMiddleware, LoggerMiddleware2 } from './app.middleware';
 import { UserController } from './user/user.controller';
 import { APP_FILTER } from '@nestjs/core';
 import { HttpExceptionFilter } from './app.filter';
-import { ReportService } from './report/report.service';
-import { ReportModule } from './report/report.module';
-import { Report } from './report/report.entity';
+import { CustomModule } from './custom-module/custom-module.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
@@ -27,7 +25,13 @@ import { Report } from './report/report.entity';
   }),
     AuthModule,
     UserModule,
-    // ReportModule
+  CustomModule.forRoot({
+    imports: [ConfigModule],
+    useFactory: async (configService: ConfigService) => ({
+      base: configService.get<string>('APP_PORT')
+    }),
+    inject: [ConfigService]
+  }),
   ],
   controllers: [AppController],
   providers: [AppService,
@@ -35,7 +39,7 @@ import { Report } from './report/report.entity';
       provide: APP_FILTER,
       useClass: HttpExceptionFilter,
     },
-    ReportService],
+  ],
 })
 
 export class AppModule implements NestModule {
