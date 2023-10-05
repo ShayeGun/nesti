@@ -11,6 +11,8 @@ import { UserController } from './user/user.controller';
 import { APP_FILTER } from '@nestjs/core';
 import { HttpExceptionFilter } from './app.filter';
 import { CustomModule } from './custom-module/custom-module.module';
+import * as redisStore from 'cache-manager-redis-store';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
   imports: [ConfigModule.forRoot({
@@ -32,6 +34,29 @@ import { CustomModule } from './custom-module/custom-module.module';
     }),
     inject: [ConfigService]
   }),
+  // CacheModule.register({
+  //   isGlobal: true,
+  //   // store: redis,
+  //   // host: 'localhost',
+  //   // port: 6379
+
+  //   // useFactory: async () => ({
+  //   //   store: await redisStore({
+  //   //     socket: {
+  //   //       host: 'localhost',
+  //   //       port: 6379
+  //   //     }
+  //   //   })
+  //   // })
+
+  // })
+  CacheModule.register({
+    store: redisStore,
+    socket: {
+      host: 'localhost',
+      port: 6379,
+    }
+  })
   ],
   controllers: [AppController],
   providers: [AppService,
