@@ -1,5 +1,6 @@
 import { DynamicModule, Module, Provider } from '@nestjs/common';
 import { Redis } from 'ioredis';
+import { createClient } from 'redis';
 import { REDIS_CLIENT } from './constants';
 
 interface OptionInterface {
@@ -25,6 +26,23 @@ export class RedisModule {
       providers: [RedisProvider],
       exports: [RedisProvider],
       global: true
+    };
+  }
+
+  static registerAsync(): DynamicModule {
+
+    const RedisProviderAsync: Provider = {
+      provide: REDIS_CLIENT,
+      useFactory: async () => {
+        const client = await createClient().connect();
+        return client;
+      }
+    };
+
+    return {
+      module: RedisModule,
+      providers: [RedisProviderAsync],
+      exports: [RedisProviderAsync]
     };
   }
 }

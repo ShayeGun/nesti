@@ -40,7 +40,7 @@ import * as redisStore from 'cache-manager-redis-store';
     }),
     AuthModule,
     UserModule,
-    RedisModule.register(),
+    RedisModule.registerAsync(),
     // ReportModule
   ],
   controllers: [AppController],

@@ -13,7 +13,7 @@ export class AppController {
   constructor(
     private readonly appService: AppService,
     @Inject('CACHE_MANAGER') private readonly cacheManager: Cache,
-    @Inject('REDIS_CLIENT') private readonly redisClient: Redis
+    @Inject(REDIS_CLIENT) private readonly redisClient: Redis
   ) { }
 
   @CacheKey('hello')
@@ -26,11 +26,11 @@ export class AppController {
     // // await this.cacheManager.del('hello');
     // const v = await this.cacheManager.get('hello');
     // console.log(v);
-    let v = await this.redisClient.get("hello");
+    let v = await this.redisClient.get("holla");
     if (!v) {
       console.log('insert into redis');
-      await this.redisClient.set("hello", "salam");
-      v = await this.redisClient.get("hello");
+      await this.redisClient.set("holla", "salam");
+      v = await this.redisClient.get("holla");
     }
 
     return `${v}`;
