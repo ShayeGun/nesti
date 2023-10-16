@@ -13,20 +13,34 @@ import { HttpExceptionFilter } from './app.filter';
 import { ReportService } from './report/report.service';
 import { ReportModule } from './report/report.module';
 import { Report } from './report/report.entity';
+import { CacheModule } from '@nestjs/cache-manager';
+import { RedisModule } from './redis/redis.module';
+import * as redisStore from 'cache-manager-redis-store';
 
 @Module({
-  imports: [ConfigModule.forRoot({
-    isGlobal: true,
-    envFilePath: '.env',
-  }),
-  MongooseModule.forRootAsync({
-    useFactory: (configService: ConfigService) => ({
-      uri: configService.get<string>('MONGO_URI')
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env',
     }),
-    inject: [ConfigService]
-  }),
+    MongooseModule.forRootAsync({
+      useFactory: (configService: ConfigService) => ({
+        uri: configService.get<string>('MONGO_URI')
+      }),
+      inject: [ConfigService]
+    }),
+    CacheModule.register({
+      isGlobal: true,
+      useFactory: async () => ({
+        store: redisStore as any,
+        host: 'localhost',
+        port: 6379,
+        // ttl: 10000,
+      }),
+    }),
     AuthModule,
     UserModule,
+    RedisModule.register(),
     // ReportModule
   ],
   controllers: [AppController],

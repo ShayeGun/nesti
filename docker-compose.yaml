@@ -24,6 +24,16 @@ services:
       - MONGO_INITDB_DATABASE=Nesti
     networks:
       - first_nest
+# ----
+  redis:
+    image: 'redis:bookworm'
+    command: redis-server
+    ports:
+      - '6379:6379'
+    volumes:
+      - dbdata6:/data/db
+    networks:
+      - first_nest
 
 volumes:
   dbdata6:
