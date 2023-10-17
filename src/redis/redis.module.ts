@@ -2,6 +2,7 @@ import { DynamicModule, Module, Provider } from '@nestjs/common';
 import { Redis } from 'ioredis';
 import { createClient } from 'redis';
 import { REDIS_CLIENT } from './constants';
+import { ConfigService, ConfigModule } from '@nestjs/config';
 
 interface OptionInterface {
   port: number, // Redis port
@@ -11,7 +12,9 @@ interface OptionInterface {
   db: number, // Defaults to 0
 }
 
-@Module({})
+@Module({
+  imports: [ConfigModule]
+})
 export class RedisModule {
   static register(otp: Partial<OptionInterface> = { port: 6379, host: "127.0.0.1" }): DynamicModule {
     const redis = new Redis(otp);
@@ -29,14 +32,21 @@ export class RedisModule {
     };
   }
 
-  static registerAsync(): DynamicModule {
+  static registerAsync(configService?: ConfigService): DynamicModule {
 
     const RedisProviderAsync: Provider = {
       provide: REDIS_CLIENT,
       useFactory: async () => {
-        const client = await createClient().connect();
+        if (!configService) {
+          const client = await createClient().connect();
+          return client;
+        }
+        const client = await createClient({
+          url: `redis://${configService.get<string>('REDIS_URL')}:${configService.get<string>('REDIS_PORT')}`
+        }).connect();
         return client;
-      }
+      },
+      inject: configService ? [ConfigService] : []
     };
 
     return {
