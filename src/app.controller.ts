@@ -20,18 +20,10 @@ export class AppController {
   @Get('/hello')
   @HttpCode(200)
   async hello(): Promise<string> {
-    // console.log("here");
 
-    // await this.cacheManager.set('hello', 'salam');
-    // // await this.cacheManager.del('hello');
-    // const v = await this.cacheManager.get('hello');
-    // console.log(v);
-    let v = await this.redisClient.get("holla");
-    if (!v) {
-      console.log('insert into redis');
-      await this.redisClient.set("holla", "salam");
-      v = await this.redisClient.get("holla");
-    }
+    console.log('insert into redis');
+    await this.redisClient.set("hello", "salam");
+    const v = await this.redisClient.get("hello");
 
     return `${v}`;
   }

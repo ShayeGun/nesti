@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
@@ -6,7 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UserModule } from './user/user.module';
-import { LoggerMiddleware, LoggerMiddleware2 } from './app.middleware';
+import { CacheMiddleware, LoggerMiddleware2 } from './app.middleware';
 import { UserController } from './user/user.controller';
 import { APP_FILTER } from '@nestjs/core';
 import { HttpExceptionFilter } from './app.filter';
@@ -54,9 +54,9 @@ import * as redisStore from 'cache-manager-redis-store';
 
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    // consumer
-    //   .apply(
-    //     LoggerMiddleware, LoggerMiddleware2)
-    //   .forRoutes(UserController);
+    consumer
+      .apply(
+        CacheMiddleware, LoggerMiddleware2)
+      .forRoutes({ path: '/person/hello', method: RequestMethod.GET });
   }
 }
