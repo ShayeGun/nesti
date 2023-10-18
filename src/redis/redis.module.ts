@@ -52,7 +52,8 @@ export class RedisModule {
     return {
       module: RedisModule,
       providers: [RedisProviderAsync],
-      exports: [RedisProviderAsync]
+      exports: [RedisProviderAsync],
+      global: true
     };
   }
 }
